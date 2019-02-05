@@ -1,6 +1,8 @@
 import React, { Fragment, Component } from 'react';
 import Burger from '../../components/Burger/Burger';
 import BuildControls from '../../components/Burger/BuildControls/BuildControls';
+import Modal from '../../components/UI/Modal/Modal';
+import OrderSummary from '../../components/Burger/OrderSummary/OrderSummary';
 
 const INGREDIENT_PRICES = {
 	salad: 0.5,
@@ -20,11 +22,9 @@ class BurgerBuilder extends Component {
 				bacon: 0
 			},
 			totalPrice: 4,
-			purchasable: false
+			purchasable: false,
+			purchasing: false
 		};
-
-		this.addIngredientHandler = this.addIngredientHandler.bind(this);
-		this.removeIngredientHandler = this.removeIngredientHandler.bind(this);
 	}
 
 	updatePurchase(ingredients) {
@@ -36,7 +36,7 @@ class BurgerBuilder extends Component {
 		this.setState({purchasable: sum > 0})
 	}
 
-	addIngredientHandler(type) {
+	addIngredientHandler = (type) => {
 		const oldCount = this.state.ingredients[type];
 		const updatedCount = oldCount + 1;
 		const updatedIngredients = {
@@ -51,9 +51,9 @@ class BurgerBuilder extends Component {
 			totalPrice: newPrice
 		});
 		this.updatePurchase(updatedIngredients);
-	}
+	};
 
-	removeIngredientHandler(type) {
+	removeIngredientHandler = (type) => {
 		const oldCount = this.state.ingredients[type];
 		if(oldCount <= 0) {
 			return;
@@ -71,7 +71,11 @@ class BurgerBuilder extends Component {
 			totalPrice: newPrice
 		});
 		this.updatePurchase(updatedIngredients);
-	}
+	};
+
+	purchaseHandler = () => {
+		this.setState({purchasing: true})
+	};
 	
 	render() {
 		const disabledInfo = {...this.state.ingredients};
@@ -80,6 +84,9 @@ class BurgerBuilder extends Component {
 		}
 		return (
 			<Fragment>
+				<Modal show={this.state.purchasing}>
+					<OrderSummary ingredients={this.state.ingredients}/>
+				</Modal>
 				<Burger ingredients={this.state.ingredients}/>
 				<BuildControls
 					ingredientAdded={this.addIngredientHandler}
@@ -87,6 +94,7 @@ class BurgerBuilder extends Component {
 					disabled={disabledInfo}
 					price={this.state.totalPrice}
 					purchasable={this.state.purchasable}
+					ordered={this.purchaseHandler}
 				/>
 			</Fragment>
 		);
